@@ -1,0 +1,3 @@
+method: "recency"
+cache_size: 256
+score_normalization: "none"

@@ -1,0 +1,7 @@
+# Qwen2.5-7B — larger model for main experiments (supports 32k context)
+name: "Qwen/Qwen2.5-7B"
+dtype: "float16"
+device: "cuda"
+trust_remote_code: false
+attn_implementation: "flash_attention_2"
+enable_pos_shift: true

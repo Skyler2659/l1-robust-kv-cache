@@ -1,0 +1,7 @@
+method: "kmeans_centroid"
+cache_size: 256
+sink_size: 4
+recent_size: 64
+n_clusters: 64
+n_iters: 5
+score_normalization: "rank"

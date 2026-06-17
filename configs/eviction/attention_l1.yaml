@@ -1,0 +1,7 @@
+method: "attention_l1"
+cache_size: 256
+sink_size: 4
+recent_size: 64
+lambda_attn: 0.5
+geometry_method: "l1"
+score_normalization: "rank"

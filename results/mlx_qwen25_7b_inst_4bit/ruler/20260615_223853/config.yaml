@@ -1,0 +1,167 @@
+experiment_name: ruler_vt_diag_qwen25_7b_8methods
+model:
+  name: mlx-community/Qwen2.5-7B-Instruct-4bit
+  family: qwen
+  backend: mlx
+  dtype: auto
+  device: mps
+  quant_bits: 4
+  quant_group_size: 64
+  mlx_weight_quantize: false
+  mlx_cache_type: kv
+  prefill_step_size: 32768
+  trust_remote_code: false
+  attn_implementation: null
+  enable_pos_shift: true
+  output_attentions: false
+  output_hidden_states: false
+  local_files_only: false
+  revision: null
+  tokenizer_type: null
+  chat_template: null
+  bos_token_id: null
+  eos_token_id: null
+  pad_token_id: null
+  max_context_length: null
+  rope_type: null
+  uses_rope: null
+  cache_format: null
+  supports_attention_output: null
+  supports_hidden_states: null
+  supports_mlx_cache_edit: null
+  default_prompt_format: plain
+  prompt_format:
+    mode: plain
+    system_prompt: null
+  generation: {}
+eviction:
+  method: full
+  methods: null
+  cache_size: 256
+  cache_budget_ratio: null
+  sink_size: 4
+  recent_size: 64
+  score_source: v
+  sketch_dim: 1024
+  update_interval: 32
+  update_policy: every_n_steps
+  seed: 42
+  use_reweight: false
+  score_normalization: rank
+  hybrid_mode: budget_split
+  lambda_attn: 0.5
+  attn_budget_ratio: 0.3
+  l1_budget_ratio: 0.3
+  geom_budget_ratio: null
+  recent_budget_ratio: 0.3
+  sink_budget_ratio: 0.1
+  geometry_method: l1
+  attention_method: accumulated
+  components: null
+  layer_strategy: all
+  selected_layers: null
+  head_strategy: shared
+  pyramid_mode: funnel
+  pyramid_beta: 20
+  n_clusters: 64
+  n_iters: 5
+  clustering_method: farthest_point
+  h2o_recent_size: null
+  window_size: 64
+  attention_window: 32
+  decay_gamma: 0.95
+  observation_window: 64
+  kernel_size: 5
+  pooling_kernel: 5
+  pooling_method: avgpool
+  compactor_sketch_dim: 48
+  compactor_chunk_size: 512
+  compactor_attention_chunk_size: 128
+  compactor_accum_blending: 0.5
+  compactor_protected_first_tokens: null
+  compactor_protected_last_tokens: null
+  ridge_lambda: 0.001
+  projection_dim: 64
+  covariance_mode: diagonal
+  distance_metric: cosine
+  debug_budget: false
+benchmark:
+  name: ruler
+  needle_pos: 400
+  needle_depth: 0.5
+  prefix_repeat: 40
+  context_length: 4096
+  num_needles: 1
+  depths: null
+  max_words: 4000
+  needles_per_depth: 3
+  n_samples: 10
+  n_depths: 20
+  use_synthetic_haystack: true
+  haystack_repeats: 120
+  ruler_task: retrieval
+  ruler_num_samples: 100
+  tasks:
+  - vt
+  n_samples_per_task: 10
+  seq_words: 2000
+  use_official_dataset: true
+  require_official_dataset: true
+  hf_dataset_name: xAlg-AI/att-hub-ruler-16k
+  hf_dataset_config: null
+  hf_split: null
+  longbench_task: narrativeqa
+  longbench_max_length: 4096
+  dataset: hotpotqa
+  split: validation
+  n_distractors: 50
+  max_steps: 32768
+  max_new_tokens: 30
+  num_samples: 10
+  eval_target_only: true
+  evaluation: official
+  use_official_prompt: false
+  qa_sample_idx: 0
+profiling:
+  enabled: true
+  track_memory: true
+  track_timing: true
+  warmup_steps: 5
+  log_every: 100
+  repeats: 3
+analysis:
+  overlap: true
+  rank_correlation: false
+  evidence_recall: false
+  counterfactual_deletion: false
+  restoration: false
+  leave_one_out: false
+  residual_explanation: false
+  case_study: true
+  case_study_count: 10
+  include_oracle: false
+  output_dir: results/analysis
+cache_budgets:
+- 256
+- 512
+- 1024
+cache_budget_ratios: null
+context_lengths: null
+update_intervals: null
+methods:
+- full
+- attention
+- snapkv
+- compactor
+- l1_prefill_only
+- l2_prefill_only
+- attention_l1
+- attention_l2
+output_dir: results
+save_selected_tokens: true
+save_scores: true
+save_prompt_text: true
+progress_every: 50
+seed: 42
+overwrite: false
+run_id: '20260615_223853'

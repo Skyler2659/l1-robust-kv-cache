@@ -1,0 +1,58 @@
+experiment_name: tiny_niah_cpu
+model:
+  name: sshleifer/tiny-gpt2
+  backend: torch
+  dtype: float32
+  device: cpu
+  trust_remote_code: false
+  output_attentions: true
+  local_files_only: false
+eviction:
+  method: recency
+  cache_size: 16
+  sink_size: 2
+  recent_size: 4
+  score_source: v
+  sketch_dim: 64
+  update_interval: 8
+  update_policy: every_n_steps
+  hybrid_mode: budget_split
+  attn_budget_ratio: 0.3
+  geom_budget_ratio: 0.3
+  recent_budget_ratio: 0.3
+  sink_budget_ratio: 0.1
+  geometry_method: l1
+  score_normalization: rank
+  seed: 0
+benchmark:
+  name: niah
+  depths: [0.5]
+  max_words: 80
+  needles_per_depth: 1
+  context_length: 256
+  max_steps: 160
+  max_new_tokens: 16
+  num_samples: 1
+  eval_target_only: true
+  use_synthetic_haystack: true
+  haystack_repeats: 30
+analysis:
+  overlap: true
+  rank_correlation: true
+  evidence_recall: true
+  case_study: true
+  case_study_count: 1
+methods:
+  - recency
+  - attention
+  - l1_leverage
+  - l2_leverage
+  - attention_l1
+cache_budgets: [16]
+output_dir: /tmp/l1_robust_kv_cache_smoke
+save_selected_tokens: true
+save_scores: true
+save_prompt_text: true
+progress_every: 50
+seed: 0
+overwrite: false

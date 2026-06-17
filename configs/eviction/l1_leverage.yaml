@@ -1,0 +1,9 @@
+method: "l1_leverage"
+cache_size: 256
+sink_size: 4
+recent_size: 64
+score_source: "v"
+sketch_dim: 1024
+update_interval: 32
+update_policy: "every_n_steps"
+score_normalization: "rank"

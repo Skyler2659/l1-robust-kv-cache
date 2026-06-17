@@ -1,0 +1,7 @@
+method: "ridge_leverage"
+cache_size: 256
+sink_size: 4
+recent_size: 64
+score_source: "v"
+ridge_lambda: 0.001
+score_normalization: "rank"

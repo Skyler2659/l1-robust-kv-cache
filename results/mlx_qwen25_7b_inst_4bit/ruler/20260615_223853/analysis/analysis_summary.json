@@ -1,0 +1,42 @@
+{
+  "tables": {
+    "method_budget_accuracy_csv": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/analysis/method_budget_accuracy.csv",
+    "method_context_accuracy_csv": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/analysis/method_context_accuracy.csv",
+    "model_method_budget_metrics_csv": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/analysis/model_method_budget_metrics.csv",
+    "model_method_metrics_csv": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/analysis/model_method_metrics.csv"
+  },
+  "overlap": {
+    "attention_vs_attention_l1": 0.4645864150883334,
+    "attention_vs_attention_l2": 0.5057859928264183,
+    "attention_vs_compactor": 0.22062104712720948,
+    "attention_vs_full": 0.14904674467938608,
+    "attention_vs_l1_prefill_only": 0.298081825540058,
+    "attention_vs_l2_prefill_only": 0.36104043067147334,
+    "attention_vs_snapkv": 0.3131319827025385,
+    "attention_l1_vs_attention_l2": 0.7298062522284491,
+    "attention_l1_vs_compactor": 0.18331081169189614,
+    "attention_l1_vs_full": 0.12080901139335955,
+    "attention_l1_vs_l1_prefill_only": 0.5542401931563997,
+    "attention_l1_vs_l2_prefill_only": 0.5409773984128013,
+    "attention_l1_vs_snapkv": 0.22599099664420355,
+    "attention_l2_vs_compactor": 0.15415828571117446,
+    "attention_l2_vs_full": 0.1010482159654528,
+    "attention_l2_vs_l1_prefill_only": 0.4154074649578536,
+    "attention_l2_vs_l2_prefill_only": 0.5776844919574244,
+    "attention_l2_vs_snapkv": 0.21667447513884353,
+    "compactor_vs_full": 0.4167227058679738,
+    "compactor_vs_l1_prefill_only": 0.2214781814750835,
+    "compactor_vs_l2_prefill_only": 0.17197634809905044,
+    "compactor_vs_snapkv": 0.31720344501855074,
+    "full_vs_l1_prefill_only": 0.14596076572753372,
+    "full_vs_l2_prefill_only": 0.10744964320183752,
+    "full_vs_snapkv": 0.3741630810384737,
+    "l1_prefill_only_vs_l2_prefill_only": 0.5541820632148177,
+    "l1_prefill_only_vs_snapkv": 0.1962456079003072,
+    "l2_prefill_only_vs_snapkv": 0.17915203011244543
+  },
+  "case_study": {
+    "num_cases": 10,
+    "path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/analysis/case_studies.json"
+  }
+}

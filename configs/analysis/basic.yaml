@@ -1,0 +1,10 @@
+overlap: true
+rank_correlation: true
+evidence_recall: true
+counterfactual_deletion: false
+restoration: false
+leave_one_out: false
+residual_explanation: false
+case_study: true
+case_study_count: 2
+output_dir: "results/analysis"

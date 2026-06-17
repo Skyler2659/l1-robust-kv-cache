@@ -1,0 +1,10 @@
+method: "snapkv"
+cache_size: 256
+sink_size: 4
+recent_size: 64
+observation_window: 32
+window_size: 32
+pooling_kernel: 5
+kernel_size: 5
+pooling_method: "avgpool"
+score_normalization: "rank"

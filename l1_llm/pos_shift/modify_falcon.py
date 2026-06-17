@@ -15,6 +15,8 @@ import types
 
 __all__ = ["enable_falcon_pos_shift_attention"]
 
+import shared_q
+
 
 def _resolve_past_kv_layer(layer_past, layer_idx):
     """Extract per-layer (past_k, past_v, kv_len) from past_key_value.
@@ -90,6 +92,9 @@ def falcon_pos_shift_attention_forward(
 
     query_layer_copy = query_layer.clone()
     query_layer, _ = self.maybe_rotary(query_layer, query_layer_copy, past_len)
+    shared_q.LAST_QUERY_STATES[layer_idx] = query_layer.reshape(
+        batch_size, self.num_heads, q_length, self.head_dim
+    )[0, :, -1, :].detach()
     if past_k is not None:
         key_layer = torch.cat((past_k, key_layer), dim=1)
         value_layer = torch.cat((past_v, value_layer), dim=1)
@@ -103,6 +108,11 @@ def falcon_pos_shift_attention_forward(
     _, key_layer = self.maybe_rotary(key_layer_copy, key_layer, 0)
 
     _, kv_length, _ = key_layer.shape
+    key_heads = key_layer.reshape(batch_size, num_kv, kv_length, self.head_dim)[0]
+    shared_q.LAST_KEY_ROWS[layer_idx] = key_heads.mean(dim=0).detach()
+    if key_heads.shape[0] != self.num_heads and self.num_heads % key_heads.shape[0] == 0:
+        key_heads = key_heads.repeat_interleave(self.num_heads // key_heads.shape[0], dim=0)
+    shared_q.LAST_KEY_STATES[layer_idx] = key_heads.detach()
 
     if alibi is None:
         query_layer_ = query_layer.reshape(
@@ -179,14 +189,19 @@ def falcon_pos_shift_attention_forward(
         return outputs
 
 
-def enable_falcon_pos_shift_attention(model):
-    for name, module in reversed(model._modules.items()):
+def enable_falcon_pos_shift_attention(model, _counter=None):
+    if _counter is None:
+        _counter = [0]
+    for name, module in model._modules.items():
         if len(list(module.children())) > 0:
             enable_falcon_pos_shift_attention(
                 module,
+                _counter,
             )
 
         if "self_attention" == name[-14:]:
+            model._modules[name].layer_idx = _counter[0]
+            _counter[0] += 1
             model._modules[name].forward = types.MethodType(
                 falcon_pos_shift_attention_forward, model._modules[name]
             )

@@ -1,0 +1,109 @@
+{
+  "backend": "mlx",
+  "by_method": {
+    "attention": {
+      "total_time_s": 241.17671773896595,
+      "prefill_time_s": 88.86454231389995,
+      "decode_time_s": 6.147768029262989,
+      "eviction_time_s": 0.904993428137027,
+      "score_time_s": 0.00288673516978785,
+      "topk_time_s": 0.009667602566090257,
+      "cache_rebuild_time_s": 1.0292625522610706,
+      "tokens_per_second": 4.993464309052302,
+      "avg_ms_per_token": 204.92560097543293,
+      "score_update_count": 868.0,
+      "eviction_count": 868.0
+    },
+    "attention_l1": {
+      "total_time_s": 247.55686028623415,
+      "prefill_time_s": 88.74624509706622,
+      "decode_time_s": 5.996823546335145,
+      "eviction_time_s": 4.20905710400275,
+      "score_time_s": 27.266084395113708,
+      "topk_time_s": 2.770678400276241,
+      "cache_rebuild_time_s": 0.32576007192310497,
+      "tokens_per_second": 5.108695343787497,
+      "avg_ms_per_token": 199.8941182111715,
+      "score_update_count": 868.0,
+      "eviction_count": 868.0
+    },
+    "attention_l2": {
+      "total_time_s": 252.56172557360048,
+      "prefill_time_s": 88.49269734033302,
+      "decode_time_s": 6.477263528401696,
+      "eviction_time_s": 6.900090762634863,
+      "score_time_s": 30.19796854746225,
+      "topk_time_s": 2.973456646872364,
+      "cache_rebuild_time_s": 0.42946180100952913,
+      "tokens_per_second": 4.731230407849725,
+      "avg_ms_per_token": 215.90878428005655,
+      "score_update_count": 868.0,
+      "eviction_count": 868.0
+    },
+    "compactor": {
+      "total_time_s": 380.8708101652668,
+      "prefill_time_s": 96.39366808740003,
+      "decode_time_s": 1.9420713972658632,
+      "eviction_time_s": 0.0,
+      "score_time_s": 7.078158268033985,
+      "topk_time_s": 0.008684169899637103,
+      "cache_rebuild_time_s": 0.035393269066783736,
+      "tokens_per_second": 15.686949814102197,
+      "avg_ms_per_token": 64.73571324219544,
+      "score_update_count": 28.0,
+      "eviction_count": 28.0
+    },
+    "full": {
+      "total_time_s": 182.22061186243323,
+      "prefill_time_s": 88.93696388903321,
+      "decode_time_s": 2.720899561263571,
+      "eviction_time_s": 0.0,
+      "score_time_s": 0.0,
+      "topk_time_s": 0.0,
+      "cache_rebuild_time_s": 0.0,
+      "tokens_per_second": 11.054841956079372,
+      "avg_ms_per_token": 90.69665204211904,
+      "score_update_count": 0.0,
+      "eviction_count": 15768.466666666667
+    },
+    "l1_prefill_only": {
+      "total_time_s": 183.1963490971666,
+      "prefill_time_s": 89.80079870969985,
+      "decode_time_s": 1.5712715652351714,
+      "eviction_time_s": 0.6436633353008195,
+      "score_time_s": 0.26472676222577624,
+      "topk_time_s": 0.0071706817319257725,
+      "cache_rebuild_time_s": 0.27095343817873074,
+      "tokens_per_second": 19.83015689585899,
+      "avg_ms_per_token": 52.37571884117238,
+      "score_update_count": 868.0,
+      "eviction_count": 868.0
+    },
+    "l2_prefill_only": {
+      "total_time_s": 184.64527803339976,
+      "prefill_time_s": 89.98391149439928,
+      "decode_time_s": 1.531201589832199,
+      "eviction_time_s": 0.654637832633307,
+      "score_time_s": 0.009081387466115606,
+      "topk_time_s": 0.007745179743384748,
+      "cache_rebuild_time_s": 0.2894490231687693,
+      "tokens_per_second": 20.214668475508464,
+      "avg_ms_per_token": 51.04005299440663,
+      "score_update_count": 868.0,
+      "eviction_count": 868.0
+    },
+    "snapkv": {
+      "total_time_s": 403.4566789959007,
+      "prefill_time_s": 115.57648502213345,
+      "decode_time_s": 6.689187188336382,
+      "eviction_time_s": 0.0,
+      "score_time_s": 26.38007571286668,
+      "topk_time_s": 0.007356811036273333,
+      "cache_rebuild_time_s": 0.04339914110169048,
+      "tokens_per_second": 4.576467599098374,
+      "avg_ms_per_token": 222.97290627787933,
+      "score_update_count": 28.0,
+      "eviction_count": 28.0
+    }
+  }
+}

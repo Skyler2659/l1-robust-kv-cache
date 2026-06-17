@@ -1,0 +1,5 @@
+method: "sink_recency"
+cache_size: 256
+sink_size: 4
+recent_size: 252
+score_normalization: "none"

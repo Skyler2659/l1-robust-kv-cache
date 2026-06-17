@@ -1,0 +1,7 @@
+# Llama-3.1-8B — RoPE-based LLaMA architecture (supports 128k context)
+name: "meta-llama/Meta-Llama-3.1-8B"
+dtype: "float16"
+device: "cuda"
+trust_remote_code: false
+attn_implementation: "flash_attention_2"
+enable_pos_shift: true

@@ -60,6 +60,19 @@ def infer_kv_seq_dims(model_type: str):
     return 2, 2
 
 
+def parse_recent_keep_grid(raw_value, default_value):
+    if raw_value is None or raw_value.strip() == "":
+        return [int(default_value)]
+    values = []
+    for item in raw_value.split(","):
+        item = item.strip()
+        if item:
+            values.append(int(item))
+    if not values:
+        raise ValueError("--mixed_recent_keeps did not contain any integers.")
+    return values
+
+
 # ── Core eval loop ──────────────────────────────────────────────────────
 
 @torch.no_grad()
@@ -102,7 +115,14 @@ def run_decode_eval(model, input_ids, cache_obj, label, k_seq_dim, max_steps,
                   f" elapsed={elapsed:.1f}s", flush=True)
 
     if len(nlls) == 0:
-        raise ValueError("No target token selected for evaluation.")
+        hint = ""
+        if eval_set is not None:
+            last_target = max(eval_set)
+            hint = (
+                f" Eval targets at token position(s) {sorted(eval_set)};"
+                f" need max_steps >= {last_target} (got total_steps={total_steps})."
+            )
+        raise ValueError("No target token selected for evaluation." + hint)
     mean_nll = torch.stack(nlls).mean().item()
     total_s = sum(step_times)
     return {"label": label, "steps": total_steps, "ppl": math.exp(mean_nll),
@@ -116,26 +136,31 @@ def run_decode_eval(model, input_ids, cache_obj, label, k_seq_dim, max_steps,
 
 def print_table(results):
     hdr = ("mode", "steps", "ppl", "tok/s", "avg ms/tok", "max kv len", "final kv len")
-    print("\n=== Four-way comparison ===")
-    print(f"{hdr[0]:<16} {hdr[1]:>7} {hdr[2]:>10} {hdr[3]:>10}"
+    mode_width = max(len(hdr[0]), *(len(r["label"]) for r in results), 16)
+    print("\n=== Comparison ===")
+    print(f"{hdr[0]:<{mode_width}} {hdr[1]:>7} {hdr[2]:>10} {hdr[3]:>10}"
           f" {hdr[4]:>12} {hdr[5]:>12} {hdr[6]:>13}")
     for r in results:
-        print(f"{r['label']:<16} {r['steps']:>7d} {r['ppl']:>10.4f}"
+        print(f"{r['label']:<{mode_width}} {r['steps']:>7d} {r['ppl']:>10.4f}"
               f" {r['tok_per_s']:>10.2f} {r['avg_ms_per_tok']:>12.3f}"
               f" {r['max_kv_len']:>12d} {r['final_kv_len']:>13d}")
 
 
 # ── Strategy dispatch table (eliminates 150+ lines of repetition) ───────
 
-def _build_strategies(args, plain_mod, main_mod, sketch_mod, h2o_mod, k_seq_dim, v_seq_dim):
+def _build_strategies(args, plain_mod, main_mod, sketch_mod, h2o_mod, snap_mod, rocket_mod,
+                      k_seq_dim, v_seq_dim):
     recent_size = max(1, args.cache_size - args.start_size)
     base = dict(k_seq_dim=k_seq_dim, v_seq_dim=v_seq_dim)
 
-    def _l1(recent_keep):
+    def _l1(recent_keep, score_source="v"):
         return sketch_mod.L1RobustKVCache(
             cache_size=args.cache_size, num_sink_tokens=args.start_size,
             sketch_dim=args.sketch_dim, recompute_interval=args.recompute_interval,
-            seed=args.seed, recent_keep=recent_keep, **base)
+            seed=args.seed, recent_keep=recent_keep, score_source=score_source, **base)
+
+    h2o_recent_size = max(args.h2o_recent_size, args.mixed_recent_keep)
+    rocket_recent_size = max(args.rocket_window_size, args.mixed_recent_keep)
 
     return {
         "plain":           plain_mod.PlainKVCache(),
@@ -143,35 +168,60 @@ def _build_strategies(args, plain_mod, main_mod, sketch_mod, h2o_mod, k_seq_dim,
             start_size=args.start_size, recent_size=recent_size, **base),
         "sliding_window":  SlidingWindowKVCache(cache_size=args.cache_size, **base),
         "recency_only":    SlidingWindowKVCache(cache_size=args.cache_size, **base),
-        "sketching":       _l1(args.l1_recent_keep),
-        "sink_l1_last":    _l1(args.l1_recent_keep),
-        "l1_mixed":        _l1(args.mixed_recent_keep),
-        "sink_recent_l1_last": _l1(args.mixed_recent_keep),
+        "sketching":       _l1(args.l1_recent_keep, "v"),
+        "kv_sketching":    _l1(args.l1_recent_keep, "kv"),
+        "sink_l1_last":    _l1(args.l1_recent_keep, "v"),
+        "sink_kv_l1_last": _l1(args.l1_recent_keep, "kv"),
+        "l1_mixed":        _l1(args.mixed_recent_keep, "v"),
+        "kv_l1_mixed":     _l1(args.mixed_recent_keep, "kv"),
+        "sink_recent_l1_last": _l1(args.mixed_recent_keep, "v"),
+        "sink_recent_kv_l1_last": _l1(args.mixed_recent_keep, "kv"),
         "h2o":              h2o_mod.H2OKVCache(cache_size=args.cache_size,
-                                             recent_size=args.h2o_recent_size, **base),
+                                             recent_size=h2o_recent_size,
+                                             sink_size=args.start_size, **base),
+        "snapkv":           snap_mod.SnapKVCache(
+            cache_size=args.cache_size,
+            window_size=args.snapkv_window_size,
+            kernel_size=args.snapkv_kernel_size,
+            sink_size=args.snapkv_sink_size,
+            **base),
+        "rocketkv":         rocket_mod.RocketKVCache(
+            cache_size=args.cache_size,
+            window_size=args.rocket_window_size,
+            kernel_size=args.rocket_kernel_size,
+            sink_size=args.start_size,
+            recent_size=rocket_recent_size,
+            **base),
     }
 
 
 COMPARISON_SPEC = {
-    "full":   ["plain", "sketching", "main", "sliding_window"],
-    "three":  ["recency_only", "sink_l1_last", "sink_recent_l1_last"],
-    "needle": ["recency_only", "main", "l1_mixed", "h2o"],
+    "full":   ["plain", "sketching", "kv_sketching", "main", "sliding_window"],
+    "three":  ["recency_only", "sink_l1_last", "sink_kv_l1_last",
+               "sink_recent_l1_last", "sink_recent_kv_l1_last"],
+    "needle": ["recency_only", "main", "l1_mixed", "kv_l1_mixed", "h2o", "snapkv", "rocketkv"],
 }
 
 COMPARISON_HELP = {
     "full":   ["- plain: no eviction baseline; usually best ppl, growing KV.",
                "- main: start+recent heuristic from original StreamingLLM.",
                "- sliding_window: recent-only baseline without sink tokens.",
-               "- sketching: your L1-robust policy."],
+               "- sketching: V-only L1-robust policy.",
+               "- kv_sketching: joint [K||V] L1-robust policy."],
     "three":  ["- recency_only: pure recent window baseline.",
-               "- sink_l1_last: sink + l1-selected history + last token.",
-               "- sink_recent_l1_last: sink + recent + l1-selected + last."],
+               "- sink_l1_last: sink + V-only L1-selected history + last token.",
+               "- sink_kv_l1_last: sink + joint [K||V] L1-selected history + last token.",
+               "- sink_recent_l1_last: sink + recent + V-only L1-selected + last.",
+               "- sink_recent_kv_l1_last: sink + recent + joint [K||V] L1-selected + last."],
     "needle": ["- recency_only: pure recent window baseline.",
                "- main: start+recent baseline.",
-               "- l1_mixed: mixed strategy (recent+historical l1).",
+               "- l1_mixed: mixed strategy with V-only L1 scoring.",
+               "- kv_l1_mixed: mixed strategy with joint [K||V] L1 scoring.",
                "- h2o: cumulative attention score (Zhang et al., NeurIPS 2023).",
+               "- snapkv: observation-window attention selection (Li et al., arXiv 2024).",
+               "- rocketkv: SnapKV + hybrid sparse attention (Behnam et al., ICML 2025).",
                "- In needle mode, ppl is computed only on answer tokens."],
-    "grid":   ["- recency_only + main (once), then l1_mixed for each RK.",
+    "grid":   ["- recency_only + main (once), then L1 mixed variants for each RK.",
                "- Specify RK list via --mixed_recent_keeps 32,48,64,80,96"],
 }
 
@@ -202,8 +252,21 @@ def main():
     parser.add_argument("--mixed_recent_keep", type=int, default=64)
     parser.add_argument("--h2o_recent_size", type=int, default=4,
                         help="Number of recent tokens H2O reserves from eviction")
+    parser.add_argument("--snapkv_window_size", type=int, default=32,
+                        help="Observation window size for the standalone SnapKV baseline")
+    parser.add_argument("--snapkv_kernel_size", type=int, default=63,
+                        help="Pooling kernel size for the standalone SnapKV baseline")
+    parser.add_argument("--snapkv_sink_size", type=int, default=0,
+                        help="Optional sink tokens reserved by the standalone SnapKV baseline")
+    parser.add_argument("--rocket_window_size", type=int, default=32,
+                        help="SnapKV observation window size for RocketKV stage 1")
+    parser.add_argument("--rocket_kernel_size", type=int, default=63,
+                        help="SnapKV pooling kernel size for RocketKV stage 1")
     parser.add_argument("--mixed_recent_keeps", type=str, default=None,
                         help="Comma-separated recent_keep values for grid mode")
+    parser.add_argument("--grid_score_source", type=str, default="v",
+                        choices=["v", "kv", "both"],
+                        help="L1 score source for grid mode: v, kv, or both")
     parser.add_argument("--comparison_mode", type=str, default="full",
                         choices=["full", "three", "needle", "grid"])
     parser.add_argument("--needle_pos", type=int, default=400)
@@ -224,6 +287,8 @@ def main():
     main_mod  = load_module_from_file("main_kv",  root / "streaming_llm" / "kv_cache.py")
     sketch_mod = load_module_from_file("sketch_kv", root / "l1_llm" / "kv_cache.py")
     h2o_mod    = load_module_from_file("h2o_kv",   root / "h2o_llm" / "kv_cache.py")
+    snap_mod   = load_module_from_file("snap_kv",  root / "snapkv" / "kv_cache.py")
+    rocket_mod = load_module_from_file("rocket_kv", root / "rocketkv" / "kv_cache.py")
 
     print(f"Loading model: {args.model} on {args.device}")
     tokenizer = AutoTokenizer.from_pretrained(args.model)
@@ -244,7 +309,8 @@ def main():
     print(f"KV cache format: {fmt}")
 
     # Build caches
-    caches = _build_strategies(args, plain_mod, main_mod, sketch_mod, h2o_mod, k_seq_dim, v_seq_dim)
+    caches = _build_strategies(args, plain_mod, main_mod, sketch_mod, h2o_mod, snap_mod, rocket_mod,
+                               k_seq_dim, v_seq_dim)
 
     # Load text
     eval_target_positions = None
@@ -296,19 +362,28 @@ def main():
     else:
         input_ids = input_ids.to(args.device)
 
+    if eval_target_positions:
+        # Step idx predicts token idx+1; last target at max(eval_target_positions).
+        min_steps = max(eval_target_positions)
+        seq_cap = input_ids.size(1) - 1
+        needed = min(min_steps, seq_cap)
+        if args.max_steps < needed:
+            print(f"max_steps: {args.max_steps} -> {needed} (to reach eval targets)", flush=True)
+            args.max_steps = needed
+
     print(f"Tokenized length: {input_ids.size(1)} | max_steps: {args.max_steps}"
           f" | cache_size: {args.cache_size} | start_size: {args.start_size}")
 
     # Run strategies
     if args.comparison_mode == "grid":
-        rk_list = [int(x.strip()) for x in args.mixed_recent_keeps.split(",")]
-        print(f"comparison_mode=grid: recency + main + l1_mixed × {rk_list}")
+        rk_list = parse_recent_keep_grid(args.mixed_recent_keeps, args.mixed_recent_keep)
+        print(f"comparison_mode=grid: recency + main + L1 mixed × {rk_list}"
+              f" score_source={args.grid_score_source}")
     elif args.comparison_mode == "three":
-        print("comparison_mode=three: recency(sliding_window), sink_l1_last(recent_keep=0),"
-              " sink_recent_l1_last(mixed_recent_keep)")
+        print("comparison_mode=three: recency plus V-only and joint [K||V] L1 variants")
     elif args.comparison_mode == "needle":
         print("comparison_mode=needle: recency(sliding_window), main(start+recent),"
-              " l1_mixed(mixed recent+l1)")
+              " l1_mixed(V-only), kv_l1_mixed([K||V]), h2o, snapkv, rocketkv")
 
     results = []
     if args.comparison_mode == "grid":
@@ -323,17 +398,20 @@ def main():
                                        max_steps=args.max_steps,
                                        progress_every=args.progress_every,
                                        eval_target_positions=eval_target_positions))
+        grid_sources = ["v", "kv"] if args.grid_score_source == "both" else [args.grid_score_source]
         for rk in rk_list:
-            rk_cache = sketch_mod.L1RobustKVCache(
-                cache_size=args.cache_size, num_sink_tokens=args.start_size,
-                sketch_dim=args.sketch_dim, recompute_interval=args.recompute_interval,
-                seed=args.seed, recent_keep=rk,
-                k_seq_dim=k_seq_dim, v_seq_dim=v_seq_dim)
-            results.append(run_decode_eval(model, input_ids, rk_cache,
-                                           label=f"l1_rk{rk}", k_seq_dim=k_seq_dim,
-                                           max_steps=args.max_steps,
-                                           progress_every=args.progress_every,
-                                           eval_target_positions=eval_target_positions))
+            for score_source in grid_sources:
+                rk_cache = sketch_mod.L1RobustKVCache(
+                    cache_size=args.cache_size, num_sink_tokens=args.start_size,
+                    sketch_dim=args.sketch_dim, recompute_interval=args.recompute_interval,
+                    seed=args.seed, recent_keep=rk, score_source=score_source,
+                    k_seq_dim=k_seq_dim, v_seq_dim=v_seq_dim)
+                label = f"l1_rk{rk}" if score_source == "v" else f"kv_l1_rk{rk}"
+                results.append(run_decode_eval(model, input_ids, rk_cache,
+                                               label=label, k_seq_dim=k_seq_dim,
+                                               max_steps=args.max_steps,
+                                               progress_every=args.progress_every,
+                                               eval_target_positions=eval_target_positions))
     else:
         for label in COMPARISON_SPEC[args.comparison_mode]:
             results.append(run_decode_eval(model, input_ids, caches[label], label=label,

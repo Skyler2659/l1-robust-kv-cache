@@ -1,0 +1,10 @@
+method: "attention_sink_recency"
+cache_size: 256
+sink_size: 4
+recent_size: 64
+hybrid_mode: "budget_split"
+sink_budget_ratio: 0.1
+recent_budget_ratio: 0.4
+attn_budget_ratio: 0.5
+geometry_method: "recency"
+score_normalization: "rank"

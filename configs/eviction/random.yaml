@@ -1,0 +1,4 @@
+method: "random"
+cache_size: 256
+seed: 42
+score_normalization: "none"

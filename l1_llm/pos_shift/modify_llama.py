@@ -89,6 +89,8 @@ def llama_pos_shift_attention_forward(
     query_states = query_states.view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
     key_states = key_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1, 2)
     value_states = value_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1, 2)
+    new_key_states = key_states
+    new_value_states = value_states
 
     kv_seq_len = key_states.shape[-2] + past_kv_len
     # Generate cos/sin for the full cache length (required for pos_shift)
@@ -113,7 +115,7 @@ def llama_pos_shift_attention_forward(
     # Return cache in the same format the framework expects
     if use_cache:
         if past_key_value is not None and hasattr(past_key_value, "update"):
-            past_key_value.update(key_states, value_states, layer_idx)
+            past_key_value.update(new_key_states, new_value_states, layer_idx)
             past_key_value_out = past_key_value
         else:
             past_key_value_out = (key_states, value_states)
@@ -123,13 +125,20 @@ def llama_pos_shift_attention_forward(
     if cos is not None:
         key_position_ids = torch.arange(kv_seq_len, device=position_ids.device).unsqueeze(0)
         key_states = apply_rotary_pos_emb_single(key_states, cos, sin, key_position_ids)
+    shared_q.LAST_KEY_ROWS[layer_idx] = key_states[0].mean(dim=0).detach()
+    shared_q.LAST_KEY_STATES[layer_idx] = repeat_kv(
+        key_states, self.num_key_value_groups
+    )[0].detach()
 
     key_states = repeat_kv(key_states, self.num_key_value_groups)
     value_states = repeat_kv(value_states, self.num_key_value_groups)
 
-    attn_weights = torch.matmul(query_states, key_states.transpose(2, 3)) / math.sqrt(self.head_dim)
+    # Compute attention in float32 to avoid fp16 overflow in Q·K^T
+    attn_weights = torch.matmul(
+        query_states.float(), key_states.transpose(2, 3).float()
+    ) / math.sqrt(self.head_dim)
     if attention_mask is not None:
-        attn_weights = attn_weights + attention_mask
+        attn_weights = attn_weights + attention_mask.float()
     attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query_states.dtype)
     attn_output = torch.matmul(attn_weights, value_states)
 
@@ -145,11 +154,15 @@ def llama_pos_shift_attention_forward(
     return attn_output, None if not output_attentions else attn_weights, past_key_value_out
 
 
-def enable_llama_pos_shift_attention(model):
-    for name, module in reversed(model._modules.items()):
+def enable_llama_pos_shift_attention(model, _counter=None):
+    if _counter is None:
+        _counter = [0]
+    for name, module in model._modules.items():
         if len(list(module.children())) > 0:
-            enable_llama_pos_shift_attention(module)
+            enable_llama_pos_shift_attention(module, _counter)
         if isinstance(module, LlamaAttention):
+            module.layer_idx = _counter[0]
+            _counter[0] += 1
             model._modules[name].forward = types.MethodType(
                 llama_pos_shift_attention_forward, model._modules[name]
             )

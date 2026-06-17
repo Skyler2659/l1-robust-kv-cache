@@ -1,0 +1,8 @@
+method: "attention_norm"
+cache_size: 256
+sink_size: 4
+recent_size: 64
+hybrid_mode: "interpolation"
+geometry_method: "value_norm"
+lambda_attn: 0.5
+score_normalization: "rank"

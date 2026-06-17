@@ -1,0 +1,6 @@
+method: "attention_decay"
+cache_size: 256
+sink_size: 4
+recent_size: 64
+decay_gamma: 0.95
+score_normalization: "rank"

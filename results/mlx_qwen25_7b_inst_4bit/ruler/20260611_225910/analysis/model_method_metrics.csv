@@ -1,0 +1,16 @@
+accuracy,avg_evidence_recall,avg_official_score,avg_primary_score,avg_tokens_per_second,method,model_name,n,official_accuracy
+0.6,0.0,60.0,60.0,13.333448679882093,attention,mlx-community/Qwen2.5-7B-Instruct-4bit,60,0.6
+1.0,0.0,100.0,100.0,13.453147279747222,attention_l1,mlx-community/Qwen2.5-7B-Instruct-4bit,60,1.0
+1.0,0.0,100.0,100.0,13.406522507585317,attention_l2,mlx-community/Qwen2.5-7B-Instruct-4bit,60,1.0
+0.0,0.0,0.0,0.0,16.913101916540906,compactor,mlx-community/Qwen2.5-7B-Instruct-4bit,60,0.0
+1.0,0.0,100.0,100.0,11.459746660944065,full,mlx-community/Qwen2.5-7B-Instruct-4bit,60,1.0
+1.0,0.0,100.0,100.0,21.519420230531296,l1_leverage,mlx-community/Qwen2.5-7B-Instruct-4bit,60,1.0
+1.0,0.0,100.0,100.0,21.699196826164755,l1_prefill_only,mlx-community/Qwen2.5-7B-Instruct-4bit,60,1.0
+1.0,0.0,100.0,100.0,21.689106799952224,l2_key_prefill_only,mlx-community/Qwen2.5-7B-Instruct-4bit,60,1.0
+1.0,0.0,100.0,100.0,21.69446568266797,l2_leverage,mlx-community/Qwen2.5-7B-Instruct-4bit,60,1.0
+1.0,0.0,100.0,100.0,22.052544758961744,l2_prefill_only,mlx-community/Qwen2.5-7B-Instruct-4bit,60,1.0
+0.13333333333333333,0.0,13.333333333333334,13.333333333333334,12.16395692005924,pyramidkv,mlx-community/Qwen2.5-7B-Instruct-4bit,60,0.13333333333333333
+0.0,0.0,0.0,0.0,21.691435647548193,random,mlx-community/Qwen2.5-7B-Instruct-4bit,60,0.0
+0.016666666666666666,0.0,1.6666666666666667,1.6666666666666667,23.285573939168692,recency,mlx-community/Qwen2.5-7B-Instruct-4bit,60,0.016666666666666666
+0.016666666666666666,0.0,1.6666666666666667,1.6666666666666667,23.202025826336303,sink_recent,mlx-community/Qwen2.5-7B-Instruct-4bit,60,0.016666666666666666
+0.43333333333333335,0.0,43.333333333333336,43.333333333333336,12.330253054531159,snapkv,mlx-community/Qwen2.5-7B-Instruct-4bit,60,0.43333333333333335

@@ -1,0 +1,47 @@
+# 7B model test on Apple M4 MPS
+experiment_name: "7b_mps_test"
+
+model:
+  name: "Qwen/Qwen2.5-7B"
+  dtype: "float16"
+  device: "mps"
+  trust_remote_code: false
+  attn_implementation: null
+  enable_pos_shift: true
+  output_attentions: true
+  local_files_only: false
+
+eviction:
+  method: "l1_leverage"
+  cache_size: 256
+  sink_size: 4
+  recent_size: 64
+  score_source: "v"
+  sketch_dim: 1024
+  update_interval: 32
+  seed: 42
+
+benchmark:
+  name: "niah"
+  depths: [0.0, 0.25, 0.5, 0.75, 1.0]
+  max_words: 1000
+  needles_per_depth: 2
+  context_length: 2048
+  max_steps: 2048
+  num_samples: 10
+  eval_target_only: true
+
+methods:
+  - "recency"
+  - "attention"
+  - "h2o"
+  - "l1_leverage"
+  - "attention+l1"
+
+cache_budgets: [128, 256]
+
+output_dir: "results"
+save_selected_tokens: true
+save_scores: true
+progress_every: 100
+seed: 42

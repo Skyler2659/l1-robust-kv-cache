@@ -114,6 +114,8 @@ def gpt_neox_pos_shift_attention_forward(
     key_position_ids = torch.arange(seq_len, device=position_ids.device).unsqueeze(0)
     key = apply_rotary_pos_emb_single(key_rot, cos, sin, key_position_ids)
     key = torch.cat((key, key_pass), dim=-1)
+    shared_q.LAST_KEY_ROWS[layer_idx] = key[0].mean(dim=0).detach()
+    shared_q.LAST_KEY_STATES[layer_idx] = key[0].detach()
 
     # Compute attention
     attn_output, attn_weights = self._attn(query, key, value, attention_mask, head_mask)
@@ -131,11 +133,14 @@ def gpt_neox_pos_shift_attention_forward(
     return outputs
 
 
-def enable_gpt_neox_pos_shift_attention(model, _counter=[0]):
-    for name, module in reversed(model._modules.items()):
+def enable_gpt_neox_pos_shift_attention(model, _counter=None):
+    if _counter is None:
+        _counter = [0]
+    for name, module in model._modules.items():
         if len(list(module.children())) > 0:
             enable_gpt_neox_pos_shift_attention(
                 module,
+                _counter,
             )
 
         if isinstance(module, GPTNeoXAttention):

@@ -1,0 +1,23 @@
+# Needle-in-a-Haystack benchmark configuration
+name: "niah"
+
+# Single-needle at varying depths
+depths: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+needles_per_depth: 5
+max_words: 4000
+
+# Multi-needle variant
+multi_needle:
+  enabled: true
+  n_needles: [3, 5, 10]
+  n_samples: 20
+
+# Variable depth (fine-grained heatmap)
+variable_depth:
+  enabled: true
+  n_depths: 20
+
+# General
+max_steps: 8192
+num_samples: 55  # total samples
+eval_target_only: true

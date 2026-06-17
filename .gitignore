@@ -1,5 +1,82 @@
-.venv_38/
-.venv/
+# Python bytecode and test caches
 __pycache__/
-*.pyc
-.claude/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Virtual environments
+.venv/
+.venv_*/
+venv/
+env/
+
+# Build and packaging artifacts
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# Local notebooks and editor state
+.ipynb_checkpoints/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS / filesystem noise
+.DS_Store
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Runtime scratch outputs that are not curated experiment results
+outputs/
+runs/
+wandb/
+mlruns/
+tmp/
+temp/
+
+# Local model weights, checkpoints, and caches.
+# Use anchored paths so configs/models/ remains tracked.
+/models/
+/checkpoints/
+/huggingface/
+/.cache/
+*.pt
+*.pth
+*.bin
+*.safetensors
+*.npy
+*.npz
+*.pkl
+*.pickle
+
+# Document binaries / drafts
+*.docx
+*.pptx
+*.xlsx
+
+# Curated benchmark result summaries are intentionally versioned.
+# Keep raw generations, token-level dumps, scores, logs, and bulky JSON/JSONL
+# local; publish only provenance, aggregate analysis tables, and figures.
+results/**
+!results/
+!results/**/
+!results/**/config.yaml
+!results/**/summary.json
+!results/**/metrics.csv
+!results/**/profiling_summary.json
+!results/**/model_info.json
+!results/**/env.json
+!results/**/analysis/
+!results/**/analysis/**
+!results/**/figures/
+!results/**/figures/**

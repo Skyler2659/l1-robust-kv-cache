@@ -1,0 +1,22 @@
+# Core runtime
+# Python 3.8 is supported for the current local venv; Python 3.9-3.11 is recommended
+# for larger model experiments.
+torch>=2.4,<2.5
+transformers>=4.46.3,<4.47
+accelerate>=1.0,<1.2
+datasets>=3.1,<3.3
+tokenizers>=0.20,<0.21
+safetensors>=0.4.5,<0.5
+huggingface-hub>=0.26,<0.28
+
+# Scientific stack compatible with Python 3.8
+numpy>=1.24,<1.25
+scipy>=1.10,<1.11
+scikit-learn>=1.3,<1.4
+matplotlib>=3.7,<3.8
+pandas>=2.0,<2.1
+
+# Config, tests, and utilities
+PyYAML>=6.0,<7
+tqdm>=4.66,<5
+pytest>=8.0,<9

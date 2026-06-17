@@ -1,0 +1,13 @@
+method: "weighted_score_hybrid"
+cache_size: 256
+sink_size: 4
+recent_size: 64
+hybrid_mode: "interpolation"
+score_normalization: "rank"
+components:
+  - name: "attention"
+    weight: 0.4
+  - name: "l1_leverage"
+    weight: 0.4
+  - name: "recency"
+    weight: 0.2

@@ -204,9 +204,10 @@ class L1RobustKVCache:
         per_layer=True,
         use_reweight=False,
         recent_keep=0,
+        score_source="v",
     ):
-        self.cache_size = int(cache_size)
-        self.num_sink_tokens = int(num_sink_tokens)
+        self.cache_size = max(1, int(cache_size))
+        self.num_sink_tokens = max(0, int(num_sink_tokens))
         self.k_seq_dim = int(k_seq_dim)
         self.v_seq_dim = int(v_seq_dim)
         self.sketch_dim = int(sketch_dim)
@@ -215,12 +216,14 @@ class L1RobustKVCache:
         self.per_layer = bool(per_layer)
         self.use_reweight = bool(use_reweight)
         self.recent_keep = int(max(0, recent_keep))
+        self.score_source = self._normalize_score_source(score_source)
         self._estimators = {}
         self._steps = 0
         self._shape_warned = False
+        fallback_sink = min(self.num_sink_tokens, max(0, self.cache_size - 1))
         self._fallback_cache = StartRecentKVCache(
-            start_size=self.num_sink_tokens,
-            recent_size=max(1, self.cache_size - self.num_sink_tokens),
+            start_size=fallback_sink,
+            recent_size=max(1, self.cache_size - fallback_sink),
             k_seq_dim=self.k_seq_dim,
             v_seq_dim=self.v_seq_dim,
         )
@@ -233,15 +236,49 @@ class L1RobustKVCache:
             )
             self._shape_warned = True
 
+    def _normalize_score_source(self, score_source):
+        value = str(score_source).lower().strip()
+        aliases = {
+            "v": "v",
+            "value": "v",
+            "v_only": "v",
+            "value_only": "v",
+            "kv": "kv",
+            "k_v": "kv",
+            "key_value": "kv",
+            "kv_concat": "kv",
+            "joint": "kv",
+        }
+        if value not in aliases:
+            raise ValueError(
+                f"Unknown score_source={score_source!r}; expected 'v' or 'kv'."
+            )
+        return aliases[value]
+
     def _get_layer_v_rows(self, layer_v):
         if self.v_seq_dim != 2 or layer_v.dim() != 4:
             return None
         # [B, H, S, D] -> average over heads for B=1 streaming case.
         return layer_v[0].mean(dim=0)
 
-    def _get_or_create_estimator(self, layer_idx, head_dim):
+    def _get_layer_k_rows(self, layer_k):
+        if self.k_seq_dim != 2 or layer_k is None or layer_k.dim() != 4:
+            return None
+        # [B, H, S, D] -> average over heads for B=1 streaming case.
+        return layer_k[0].mean(dim=0)
+
+    def _get_score_rows(self, layer_k, layer_v):
+        v_rows = self._get_layer_v_rows(layer_v)
+        if v_rows is None or self.score_source == "v":
+            return v_rows
+        k_rows = self._get_layer_k_rows(layer_k)
+        if k_rows is None or k_rows.shape[0] != v_rows.shape[0]:
+            return v_rows
+        return torch.cat([k_rows.float(), v_rows.float()], dim=-1)
+
+    def _get_or_create_estimator(self, layer_idx, row_dim):
         est = self._estimators.get(layer_idx)
-        target_sketch_dim = max(self.sketch_dim, min(head_dim * head_dim, 4096))
+        target_sketch_dim = max(self.sketch_dim, min(row_dim * row_dim, 4096))
         if est is None:
             est = L1LeverageScoreEstimator(
                 sketch_dim=target_sketch_dim,
@@ -251,15 +288,15 @@ class L1RobustKVCache:
         return est
 
     def _select_indices_for_layer(self, layer_idx, layer_v, layer_k=None):
-        v_rows = self._get_layer_v_rows(layer_v)
-        if v_rows is None:
+        score_rows = self._get_score_rows(layer_k, layer_v)
+        if score_rows is None:
             return None, None
-        seq_len, head_dim = v_rows.shape
+        seq_len, row_dim = score_rows.shape
         if seq_len <= self.cache_size:
             return None, None
-        estimator = self._get_or_create_estimator(layer_idx, head_dim)
+        estimator = self._get_or_create_estimator(layer_idx, row_dim)
         force_refit = (self._steps % self.recompute_interval) == 0
-        scores = estimator.scores(v_rows, force_refit=force_refit)
+        scores = estimator.scores(score_rows, force_refit=force_refit)
 
         keep = self._select_with_recency_mix(scores)
         rw = compute_reweight(scores, keep) if self.use_reweight else None
@@ -267,12 +304,12 @@ class L1RobustKVCache:
 
     def _select_with_recency_mix(self, scores):
         seq_len = int(scores.numel())
-        budget = int(self.cache_size)
+        budget = max(1, int(self.cache_size))
         if seq_len <= budget:
             return torch.arange(seq_len, device=scores.device, dtype=torch.long)
 
-        sink = min(self.num_sink_tokens, budget)
         # Reserve one slot for the latest token.
+        sink = min(self.num_sink_tokens, max(0, budget - 1))
         max_recent = max(0, budget - sink - 1)
         recent = min(self.recent_keep, max_recent)
         l1_budget = max(0, budget - sink - recent - 1)
@@ -300,7 +337,10 @@ class L1RobustKVCache:
         parts.append(torch.tensor([seq_len - 1], device=scores.device, dtype=torch.long))
         keep = torch.cat(parts).unique(sorted=True)
         if keep.numel() > budget:
-            keep = keep[-budget:]
+            keep = keep[:budget - 1]
+            keep = torch.cat(
+                [keep, torch.tensor([seq_len - 1], device=scores.device, dtype=torch.long)]
+            ).unique(sorted=True)
         return keep
 
     def __call__(self, past_key_values):
@@ -345,7 +385,7 @@ class L1RobustKVCache:
             return self._fallback_cache.evict_for_space(past_key_values, num_coming)
         pkv = _to_legacy(past_key_values)
         seq_len = pkv[0][0].size(self.k_seq_dim)
-        budget = max(self.num_sink_tokens + 1, self.cache_size - int(num_coming))
+        budget = max(1, self.cache_size - max(0, int(num_coming)))
         if seq_len <= budget:
             return past_key_values
         old = self.cache_size

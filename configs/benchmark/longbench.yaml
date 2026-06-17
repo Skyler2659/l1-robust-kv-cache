@@ -1,0 +1,25 @@
+# LongBench benchmark configuration
+name: "longbench"
+
+# Task categories to evaluate
+tasks:
+  # Single-document QA
+  - "narrativeqa"
+  - "triviaqa"
+  # Multi-document QA
+  - "hotpotqa"
+  - "2wikimultihopqa"
+  - "musique"
+  # Summarization
+  - "gov_report"
+  - "qmsum"
+
+# Samples per task
+n_samples_per_task: 50
+
+# Context length
+max_words: 4000
+
+# General
+max_steps: 8192
+eval_target_only: true

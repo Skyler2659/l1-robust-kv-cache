@@ -1,0 +1,18 @@
+{
+  "accuracy_by_budget": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/figures/accuracy_by_budget.png",
+  "accuracy_by_method_budget": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/figures/accuracy_by_method_budget.png",
+  "evidence_recall_by_method_budget": "",
+  "official_score_by_method_budget": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/figures/official_score_by_method_budget.png",
+  "latency_by_method_budget": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/figures/latency_by_method_budget.png",
+  "method_budget_heatmap": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/figures/method_budget_heatmap.png",
+  "official_score_heatmap": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/figures/official_score_heatmap.png",
+  "evidence_recall_heatmap": "",
+  "method_overlap_heatmap": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/figures/method_overlap_heatmap.png",
+  "rank_correlation_heatmap": "",
+  "latency_breakdown": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/figures/latency_breakdown.png",
+  "selected_token_position_distribution": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/figures/selected_token_position_distribution.png",
+  "model_method_accuracy_heatmap": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/figures/model_method_accuracy_heatmap.png",
+  "model_method_official_score_heatmap": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/figures/model_method_official_score_heatmap.png",
+  "model_method_evidence_recall_heatmap": "",
+  "case_study_markdown": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/analysis/case_study.md"
+}

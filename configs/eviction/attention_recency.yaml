@@ -1,0 +1,6 @@
+method: "attention_recency"
+cache_size: 256
+sink_size: 4
+recent_size: 64
+lambda_attn: 0.5
+score_normalization: "rank"

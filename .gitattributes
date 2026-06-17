@@ -1,0 +1,14 @@
+# Keep source, config, docs, and small aggregate result files diffable.
+*.py text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.sh text eol=lf
+*.json text eol=lf
+*.csv text eol=lf
+
+# Figures are binary artifacts.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary

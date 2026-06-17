@@ -1,0 +1,6 @@
+method: "pyramidkv"
+cache_size: 256
+sink_size: 4
+recent_size: 64
+pyramid_mode: "funnel"
+score_normalization: "rank"

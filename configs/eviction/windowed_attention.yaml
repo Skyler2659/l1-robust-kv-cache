@@ -1,0 +1,6 @@
+method: "windowed_attention"
+cache_size: 256
+sink_size: 4
+recent_size: 64
+attention_window: 32
+score_normalization: "rank"

@@ -1,0 +1,114 @@
+# Hybrid eviction configuration — combining attention + L1 signals
+# Tests the core scientific question: are these signals complementary?
+
+methods:
+  # ── Score interpolation mode ─────────────────────────────────────────
+  hybrid_interp_0.0:
+    method: "hybrid"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    hybrid_mode: "interpolation"
+    lambda_attn: 0.0       # pure L1
+    geometry_method: "l1"
+    sketch_dim: 1024
+    seed: 42
+
+  hybrid_interp_0.3:
+    method: "hybrid"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    hybrid_mode: "interpolation"
+    lambda_attn: 0.3
+    geometry_method: "l1"
+    sketch_dim: 1024
+    seed: 42
+
+  hybrid_interp_0.5:
+    method: "hybrid"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    hybrid_mode: "interpolation"
+    lambda_attn: 0.5       # equal weight
+    geometry_method: "l1"
+    sketch_dim: 1024
+    seed: 42
+
+  hybrid_interp_0.7:
+    method: "hybrid"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    hybrid_mode: "interpolation"
+    lambda_attn: 0.7
+    geometry_method: "l1"
+    sketch_dim: 1024
+    seed: 42
+
+  hybrid_interp_1.0:
+    method: "hybrid"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    hybrid_mode: "interpolation"
+    lambda_attn: 1.0       # pure attention
+    geometry_method: "l1"
+    sketch_dim: 1024
+    seed: 42
+
+  # ── Budget split mode ────────────────────────────────────────────────
+  hybrid_split_default:
+    method: "hybrid"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    hybrid_mode: "budget_split"
+    attn_budget_ratio: 0.3
+    l1_budget_ratio: 0.3
+    recent_budget_ratio: 0.3
+    sink_budget_ratio: 0.1
+    geometry_method: "l1"
+    sketch_dim: 1024
+    seed: 42
+
+  hybrid_split_l1_heavy:
+    method: "hybrid"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    hybrid_mode: "budget_split"
+    attn_budget_ratio: 0.15
+    l1_budget_ratio: 0.45
+    recent_budget_ratio: 0.3
+    sink_budget_ratio: 0.1
+    geometry_method: "l1"
+    sketch_dim: 1024
+    seed: 42
+
+  hybrid_split_attn_heavy:
+    method: "hybrid"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    hybrid_mode: "budget_split"
+    attn_budget_ratio: 0.45
+    l1_budget_ratio: 0.15
+    recent_budget_ratio: 0.3
+    sink_budget_ratio: 0.1
+    geometry_method: "l1"
+    sketch_dim: 1024
+    seed: 42
+
+  # ── Hybrid with L2 instead of L1 ────────────────────────────────────
+  hybrid_interp_l2:
+    method: "hybrid"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    hybrid_mode: "interpolation"
+    lambda_attn: 0.5
+    geometry_method: "l2"
+    sketch_dim: 1024
+    seed: 42

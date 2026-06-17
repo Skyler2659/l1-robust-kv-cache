@@ -1,0 +1,18 @@
+# RULER benchmark configuration
+name: "ruler"
+
+# Task categories to evaluate
+tasks:
+  - "variable_tracking"
+  - "common_words"
+  - "multi_hop"
+
+# Samples per task
+n_samples_per_task: 20
+
+# Context length
+seq_words: 2000
+
+# General
+max_steps: 4096
+eval_target_only: true

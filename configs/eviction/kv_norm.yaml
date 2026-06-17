@@ -1,0 +1,6 @@
+method: "kv_norm"
+cache_size: 256
+sink_size: 4
+recent_size: 64
+score_source: "key_value_concat"
+score_normalization: "rank"

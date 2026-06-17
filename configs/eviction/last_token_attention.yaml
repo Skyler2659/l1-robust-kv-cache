@@ -1,0 +1,5 @@
+method: "last_token_attention"
+cache_size: 256
+sink_size: 4
+recent_size: 64
+score_normalization: "rank"

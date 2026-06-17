@@ -1,0 +1,52 @@
+experiment_name: "ruler_qwen25_7b_mlx4bit"
+run_id: "20260610_165644"
+model:
+  name: "mlx-community/Qwen2.5-7B-Instruct-4bit"
+  family: "qwen"
+  backend: "mlx"
+  dtype: "auto"
+  device: "mps"
+  quant_bits: 4
+  quant_group_size: 64
+  mlx_weight_quantize: false
+  prefill_step_size: 1024
+  trust_remote_code: false
+  local_files_only: false
+  prompt_format:
+    mode: "plain"
+    system_prompt: null
+eviction:
+  method: "recency"
+  cache_size: 256
+  sink_size: 4
+  recent_size: 64
+  score_source: "v"
+  sketch_dim: 1024
+  update_interval: 32
+  score_normalization: "rank"
+  seed: 42
+benchmark:
+  name: "ruler"
+  tasks: ["variable_tracking", "common_words", "multi_hop"]
+  n_samples_per_task: 20
+  num_samples: 20
+  seq_words: 2000
+  context_length: 4096
+  max_steps: 4096
+  max_new_tokens: 64
+  eval_target_only: true
+methods: ["full", "recency", "sink_recency", "accumulated_attention", "h2o_style", "l1_leverage", "l2_leverage", "value_l2_norm", "random"]
+cache_budgets: [64, 128, 256, 512]
+analysis:
+  overlap: true
+  rank_correlation: true
+  evidence_recall: true
+  case_study: true
+  include_oracle: false
+output_dir: "results"
+save_selected_tokens: true
+save_scores: true
+save_prompt_text: true
+progress_every: 100
+seed: 42
+overwrite: false

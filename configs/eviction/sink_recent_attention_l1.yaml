@@ -1,0 +1,11 @@
+method: "sink_recent_attention_l1"
+cache_size: 256
+sink_size: 4
+recent_size: 64
+hybrid_mode: "budget_split"
+attn_budget_ratio: 0.3
+l1_budget_ratio: 0.3
+recent_budget_ratio: 0.3
+sink_budget_ratio: 0.1
+geometry_method: "l1"
+score_normalization: "rank"

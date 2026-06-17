@@ -1,10 +1,25 @@
 import torch
 
 
-def _safe_exp_samples(size, device, dtype):
+def _make_cpu_generator(seed):
+    if seed is None:
+        return None
+    generator = torch.Generator(device="cpu")
+    generator.manual_seed(int(seed))
+    return generator
+
+
+def _safe_exp_samples(size, device, dtype, generator=None):
     # Always generate in float32 — 1e-8 clamp is subnormal in float16
-    u = torch.rand(size, device=device, dtype=torch.float32).clamp_(1e-8, 1 - 1e-8)
-    return -torch.log(1.0 - u).to(dtype)
+    # Seeded generators are CPU-backed so Exp weights do not touch global RNG.
+    sample_device = "cpu" if generator is not None else device
+    u = torch.rand(
+        size,
+        device=sample_device,
+        dtype=torch.float32,
+        generator=generator,
+    ).clamp_(1e-8, 1 - 1e-8)
+    return -torch.log(1.0 - u).to(device=device, dtype=dtype)
 
 
 class CountSketch:
@@ -13,12 +28,12 @@ class CountSketch:
         self.seed = seed
         self.hash_buckets = None
         self.signs = None
-        self._generator = None
-        if self.seed is not None:
-            self._generator = torch.Generator(device="cpu")
-            self._generator.manual_seed(int(self.seed))
+        self._generator = _make_cpu_generator(self.seed)
 
     def _ensure_capacity(self, n, device):
+        if self.hash_buckets is not None and self.hash_buckets.device != device:
+            self.hash_buckets = self.hash_buckets.to(device)
+            self.signs = self.signs.to(device)
         if self.hash_buckets is not None and self.hash_buckets.numel() >= n:
             return
         old_n = 0 if self.hash_buckets is None else int(self.hash_buckets.numel())
@@ -51,13 +66,21 @@ class CountSketch:
 
 
 class L1SubspaceEmbedding:
-    def __init__(self, sketch_dim, seed=None):
+    def __init__(self, sketch_dim, seed=None, exp_generator=None):
         self.sketch_dim = int(sketch_dim)
         self.count_sketch = CountSketch(self.sketch_dim, seed=seed)
+        self._exp_generator = exp_generator
+        if self._exp_generator is None:
+            self._exp_generator = _make_cpu_generator(seed)
 
     def embed(self, v_rows):
         n = v_rows.shape[0]
-        weighted = v_rows / _safe_exp_samples((n, 1), v_rows.device, v_rows.dtype)
+        weighted = v_rows / _safe_exp_samples(
+            (n, 1),
+            v_rows.device,
+            v_rows.dtype,
+            generator=self._exp_generator,
+        )
         return self.count_sketch.apply(weighted)
 
 
@@ -65,7 +88,12 @@ class L1LeverageScoreEstimator:
     def __init__(self, sketch_dim=1024, seed=None):
         self.sketch_dim = int(sketch_dim)
         self.seed = seed
-        self.embedding = L1SubspaceEmbedding(self.sketch_dim, seed=seed)
+        self._exp_generator = _make_cpu_generator(seed)
+        self.embedding = L1SubspaceEmbedding(
+            self.sketch_dim,
+            seed=seed,
+            exp_generator=self._exp_generator,
+        )
         self.r_inv = None
         self.last_dim = None
 
@@ -78,7 +106,12 @@ class L1LeverageScoreEstimator:
         # Skip CountSketch and directly weight V with Exp(1) for exact ℓ₁ basis.
         if n < self.embedding.count_sketch.sketch_dim:
             # Force float32 for Exp samples — 1e-8 is subnormal in float16
-            w = v_rows.float() / _safe_exp_samples((n, 1), v_rows.device, torch.float32)
+            w = v_rows.float() / _safe_exp_samples(
+                (n, 1),
+                v_rows.device,
+                torch.float32,
+                generator=self._exp_generator,
+            )
         else:
             w = self.embedding.embed(v_rows).float()
         # Guard against NaN from upstream FP16 operations
@@ -88,6 +121,12 @@ class L1LeverageScoreEstimator:
         _, r = torch.linalg.qr(w, mode="reduced")
         if torch.isnan(r).any():
             self.r_inv = None
+            return
+        if r.shape[0] != r.shape[1]:
+            # Rank-deficient / underdetermined early caches do not have an
+            # invertible R. Fall back to row L1 norms until enough rows exist.
+            self.r_inv = None
+            self.last_dim = d
             return
         # Adaptive jitter — strong enough for near-square matrices
         jit = max(1e-4, r.diag().abs().max().item() * 1e-6)

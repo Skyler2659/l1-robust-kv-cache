@@ -1,0 +1,122 @@
+[
+  {
+    "sample_id": 0,
+    "category": "best_vs_worst",
+    "best_method": "full",
+    "best_ppl": 1.0,
+    "worst_method": "compactor",
+    "worst_ppl": 14.876410726845135,
+    "ground_truth": "ENGFW",
+    "evidence_positions": [],
+    "best_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/full_b256_s0.json",
+    "worst_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/compactor_b256_s0.json"
+  },
+  {
+    "sample_id": 1,
+    "category": "best_vs_worst",
+    "best_method": "l2_prefill_only",
+    "best_ppl": 1.0052219202795956,
+    "worst_method": "compactor",
+    "worst_ppl": 104.69398503111668,
+    "ground_truth": "JNJGN",
+    "evidence_positions": [],
+    "best_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/l2_prefill_only_b512_s1.json",
+    "worst_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/compactor_b256_s1.json"
+  },
+  {
+    "sample_id": 2,
+    "category": "best_vs_worst",
+    "best_method": "l2_prefill_only",
+    "best_ppl": 1.0048947528552166,
+    "worst_method": "compactor",
+    "worst_ppl": 19.66821549756221,
+    "ground_truth": "DQBDF",
+    "evidence_positions": [],
+    "best_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/l2_prefill_only_b256_s2.json",
+    "worst_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/compactor_b256_s2.json"
+  },
+  {
+    "sample_id": 3,
+    "category": "best_vs_worst",
+    "best_method": "compactor",
+    "best_ppl": 1.008306366836172,
+    "worst_method": "compactor",
+    "worst_ppl": 54.573064736074414,
+    "ground_truth": "OBAEM",
+    "evidence_positions": [],
+    "best_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/compactor_b1024_s3.json",
+    "worst_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/compactor_b256_s3.json"
+  },
+  {
+    "sample_id": 4,
+    "category": "best_vs_worst",
+    "best_method": "attention_l1",
+    "best_ppl": 1.0039138893383475,
+    "worst_method": "compactor",
+    "worst_ppl": 24.80232751057381,
+    "ground_truth": "ITYKU",
+    "evidence_positions": [],
+    "best_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/attention_l1_b1024_s4.json",
+    "worst_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/compactor_b256_s4.json"
+  },
+  {
+    "sample_id": 5,
+    "category": "best_vs_worst",
+    "best_method": "attention_l1",
+    "best_ppl": 1.0008684324248192,
+    "worst_method": "compactor",
+    "worst_ppl": 31.929861422184146,
+    "ground_truth": "OZGNR",
+    "evidence_positions": [],
+    "best_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/attention_l1_b512_s5.json",
+    "worst_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/compactor_b256_s5.json"
+  },
+  {
+    "sample_id": 6,
+    "category": "best_vs_worst",
+    "best_method": "l2_prefill_only",
+    "best_ppl": 1.0058765747144782,
+    "worst_method": "compactor",
+    "worst_ppl": 58.48952370588267,
+    "ground_truth": "YFZET",
+    "evidence_positions": [],
+    "best_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/l2_prefill_only_b1024_s6.json",
+    "worst_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/compactor_b256_s6.json"
+  },
+  {
+    "sample_id": 7,
+    "category": "best_vs_worst",
+    "best_method": "l2_prefill_only",
+    "best_ppl": 1.0041753592911185,
+    "worst_method": "compactor",
+    "worst_ppl": 33.88311022114183,
+    "ground_truth": "FTORF",
+    "evidence_positions": [],
+    "best_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/l2_prefill_only_b1024_s7.json",
+    "worst_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/compactor_b256_s7.json"
+  },
+  {
+    "sample_id": 8,
+    "category": "best_vs_worst",
+    "best_method": "attention",
+    "best_ppl": 1.0409966498547556,
+    "worst_method": "compactor",
+    "worst_ppl": 93.1340803044687,
+    "ground_truth": "APFPK",
+    "evidence_positions": [],
+    "best_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/attention_b1024_s8.json",
+    "worst_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/compactor_b256_s8.json"
+  },
+  {
+    "sample_id": 9,
+    "category": "best_vs_worst",
+    "best_method": "l2_prefill_only",
+    "best_ppl": 1.0223039182263827,
+    "worst_method": "compactor",
+    "worst_ppl": 112.54414990237413,
+    "ground_truth": "HEVQW",
+    "evidence_positions": [],
+    "best_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/l2_prefill_only_b512_s9.json",
+    "worst_selected_tokens_path": "results/mlx_qwen25_7b_inst_4bit/ruler/20260615_223853/selected_tokens/compactor_b256_s9.json"
+  }
+]

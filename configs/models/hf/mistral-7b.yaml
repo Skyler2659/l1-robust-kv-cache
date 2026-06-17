@@ -1,0 +1,7 @@
+# Mistral-7B — GQA model for testing eviction under grouped-query attention
+name: "mistralai/Mistral-7B-v0.3"
+dtype: "float16"
+device: "cuda"
+trust_remote_code: false
+attn_implementation: "flash_attention_2"
+enable_pos_shift: true

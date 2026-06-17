@@ -1,0 +1,103 @@
+# Baseline eviction methods configuration
+# These are the non-L1 methods used for comparison
+
+methods:
+  # ── Trivial baselines ────────────────────────────────────────────────
+  full:
+    method: "full"
+    cache_size: 0  # unlimited
+
+  recency:
+    method: "recency"
+    cache_size: 256
+
+  sink_recent:
+    method: "sink_recent"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 252
+
+  random:
+    method: "random"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    seed: 42
+
+  uniform:
+    method: "uniform"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+
+  # ── Attention-based methods ──────────────────────────────────────────
+  attention:
+    method: "attention"
+    cache_size: 256
+    sink_size: 0
+    recent_size: 0
+
+  h2o:
+    method: "h2o"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+
+  snapkv:
+    method: "snapkv"
+    cache_size: 256
+    sink_size: 0
+    recent_size: 0
+    # SnapKV-specific: observation window
+
+  pyramidkv:
+    method: "pyramidkv"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    pyramid_mode: "funnel"
+
+  rocketkv:
+    method: "rocketkv"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+
+  # ── Geometry-based methods ───────────────────────────────────────────
+  key_norm:
+    method: "key_norm"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+
+  value_norm:
+    method: "value_norm"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+
+  kv_norm:
+    method: "kv_norm"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+
+  l2_leverage:
+    method: "l2_leverage"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+
+  clustering:
+    method: "clustering"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    clustering_method: "farthest_point"
+    n_clusters: 64
+
+  pca_residual:
+    method: "pca_residual"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64

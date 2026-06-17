@@ -1,0 +1,73 @@
+# Main experiment configuration
+# Full experiment: all methods × all benchmarks × budget sweep
+
+experiment_name: "main_experiment"
+
+# Model
+model:
+  name: "Qwen/Qwen2.5-1.5B"
+  dtype: "float16"
+  device: "cuda"
+  trust_remote_code: false
+  attn_implementation: null
+  enable_pos_shift: true
+
+# Eviction (default; overridden by method sweep)
+eviction:
+  method: "l1_leverage"
+  cache_size: 256
+  sink_size: 4
+  recent_size: 64
+  score_source: "v"
+  sketch_dim: 1024
+  update_interval: 32
+  seed: 42
+
+# Benchmark (default; overridden by benchmark sweep)
+benchmark:
+  name: "niah"
+  max_steps: 8192
+  num_samples: 50
+  eval_target_only: true
+
+# Profiling
+profiling:
+  enabled: true
+  track_memory: true
+  track_timing: true
+  warmup_steps: 5
+  log_every: 100
+
+# Analysis
+analysis:
+  overlap: true
+  rank_correlation: true
+  evidence_recall: true
+  counterfactual_deletion: false
+  restoration: false
+  leave_one_out: false
+  residual_explanation: false
+  case_study: true
+  case_study_count: 5
+  output_dir: "results/analysis"
+
+# ── Sweep dimensions ───────────────────────────────────────────────────
+
+# Cache budgets to sweep (absolute token counts)
+cache_budgets: [64, 128, 256, 512, 1024]
+
+# Alternative: budget as fraction of context length
+# cache_budget_ratios: [0.05, 0.1, 0.2, 0.3, 0.5]
+
+# Context lengths to sweep
+context_lengths: [2048, 4096, 8192, 16384, 32768]
+
+# Update intervals to sweep (for L1 methods)
+update_intervals: [1, 16, 32, 64, 0]
+
+# ── Output ─────────────────────────────────────────────────────────────
+output_dir: "results"
+save_selected_tokens: true
+save_scores: false
+progress_every: 100
+seed: 42

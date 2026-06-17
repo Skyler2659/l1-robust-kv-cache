@@ -1,0 +1,43 @@
+experiment:
+  name: "mlx_7b_baseline_comparison"
+  models:
+    - "configs/models/qwen25_7b_mlx_4bit.yaml"
+    - "configs/models/llama31_8b_mlx_4bit.yaml"
+    - "configs/models/mistral7b_mlx_4bit.yaml"
+  benchmarks:
+    - "niah"
+    - "ruler"
+  methods:
+    - "full"
+    - "recency"
+    - "sink_recency"
+    - "accumulated_attention"
+    - "h2o_style"
+    - "l1_leverage"
+    - "l2_leverage"
+    - "value_l2_norm"
+    - "random"
+  budgets: [64, 128, 256, 512]
+  context_lengths: [1024, 2048, 4096, 8192]
+  samples_per_setting: 20
+  output_dir: "results"
+  seed: 42
+defaults:
+  eviction:
+    sink_size: 4
+    recent_size: 64
+    score_source: "v"
+    sketch_dim: 1024
+    update_interval: 32
+    score_normalization: "rank"
+  benchmark:
+    max_new_tokens: 64
+    eval_target_only: true
+    use_synthetic_haystack: true
+    haystack_repeats: 120
+  analysis:
+    overlap: true
+    rank_correlation: true
+    evidence_recall: true
+    case_study: true
+    include_oracle: false

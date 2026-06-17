@@ -1,0 +1,7 @@
+method: "hidden_l2_norm"
+cache_size: 256
+sink_size: 4
+recent_size: 64
+score_source: "hidden"
+score_normalization: "rank"
+unsupported_reason: "Hidden states are not available through the current eviction cache interface."

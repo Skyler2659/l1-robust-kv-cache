@@ -1,0 +1,6 @@
+method: "pca_residual"
+cache_size: 256
+sink_size: 4
+recent_size: 64
+score_source: "value"
+score_normalization: "rank"

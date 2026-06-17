@@ -1,0 +1,85 @@
+experiment_name: official_ruler_niah_single_qwen25_7b
+model:
+  name: mlx-community/Qwen2.5-7B-Instruct-4bit
+  family: qwen
+  backend: mlx
+  dtype: auto
+  device: mps
+  quant_bits: 4
+  quant_group_size: 64
+  mlx_weight_quantize: false
+  prefill_step_size: 32768
+  trust_remote_code: false
+  local_files_only: false
+  prompt_format:
+    mode: plain
+    system_prompt: null
+eviction:
+  method: recency
+  cache_size: 256
+  sink_size: 4
+  recent_size: 64
+  score_source: v
+  sketch_dim: 1024
+  update_interval: 32
+  update_policy: every_n_steps
+  score_normalization: rank
+  observation_window: 64
+  window_size: 64
+  pooling_kernel: 5
+  pooling_method: avgpool
+  pyramid_mode: funnel
+  hybrid_mode: budget_split
+  lambda_attn: 0.5
+  attn_budget_ratio: 0.3
+  l1_budget_ratio: 0.3
+  recent_budget_ratio: 0.3
+  sink_budget_ratio: 0.1
+  seed: 42
+benchmark:
+  name: ruler
+  tasks:
+    - niah_single_1
+  use_official_dataset: true
+  require_official_dataset: true
+  hf_dataset_name: xAlg-AI/att-hub-ruler-16k
+  n_samples_per_task: 20
+  num_samples: 20
+  max_steps: 32768
+  max_new_tokens: 128
+  eval_target_only: true
+  evaluation: official
+methods:
+  - full
+  - random
+  - recency
+  - sink_recent
+  - attention
+  - snapkv
+  - compactor
+  - pyramidkv
+  - l2_prefill_only
+  - l2_key_prefill_only
+  - l2_leverage
+  - l1_prefill_only
+  - l1_leverage
+  - attention_l2
+  - attention_l1
+cache_budgets:
+  - 128
+  - 256
+  - 512
+analysis:
+  overlap: true
+  rank_correlation: true
+  evidence_recall: false
+  case_study: true
+  case_study_count: 10
+  include_oracle: false
+output_dir: results
+save_selected_tokens: true
+save_scores: true
+save_prompt_text: true
+progress_every: 100
+seed: 42
+overwrite: false

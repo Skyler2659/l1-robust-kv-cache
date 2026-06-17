@@ -1,0 +1,21 @@
+# Multi-hop QA benchmark configuration
+name: "multihop"
+
+# Datasets to evaluate
+datasets:
+  - name: "hotpotqa"
+    split: "validation"
+    n_samples: 100
+    max_words: 4000
+  - name: "2wikimultihopqa"
+    split: "validation"
+    n_samples: 100
+    max_words: 4000
+  - name: "musique"
+    split: "validation"
+    n_samples: 100
+    max_words: 4000
+
+# General
+max_steps: 8192
+eval_target_only: true

@@ -1,0 +1,6 @@
+method: "mahalanobis_distance"
+cache_size: 256
+sink_size: 4
+recent_size: 64
+covariance_mode: "diagonal"
+score_normalization: "rank"

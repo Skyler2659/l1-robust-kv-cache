@@ -1,0 +1,107 @@
+# L1 leverage eviction configuration
+# Primary method: Woodruff-style approximate L1 leverage scores
+
+methods:
+  # ── Primary L1 method (Woodruff sketching) ───────────────────────────
+  l1_woodruff:
+    method: "l1_leverage"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    score_source: "v"       # "v", "k", or "kv"
+    sketch_dim: 1024
+    update_interval: 32     # recompute scores every 32 steps
+    seed: 42
+
+  l1_woodruff_kv:
+    method: "l1_leverage"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    score_source: "kv"
+    sketch_dim: 1024
+    update_interval: 32
+    seed: 42
+
+  # ── Ablation: score source ───────────────────────────────────────────
+  l1_key_only:
+    method: "l1_leverage"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    score_source: "k"
+    sketch_dim: 1024
+    update_interval: 32
+    seed: 42
+
+  # ── Ablation: sketch dimensions ──────────────────────────────────────
+  l1_sketch_256:
+    method: "l1_leverage"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    score_source: "v"
+    sketch_dim: 256
+    update_interval: 32
+    seed: 42
+
+  l1_sketch_512:
+    method: "l1_leverage"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    score_source: "v"
+    sketch_dim: 512
+    update_interval: 32
+    seed: 42
+
+  l1_sketch_2048:
+    method: "l1_leverage"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    score_source: "v"
+    sketch_dim: 2048
+    update_interval: 32
+    seed: 42
+
+  # ── Ablation: update frequency ───────────────────────────────────────
+  l1_update_1:
+    method: "l1_leverage"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    score_source: "v"
+    sketch_dim: 1024
+    update_interval: 1
+    seed: 42
+
+  l1_update_16:
+    method: "l1_leverage"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    score_source: "v"
+    sketch_dim: 1024
+    update_interval: 16
+    seed: 42
+
+  l1_update_64:
+    method: "l1_leverage"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    score_source: "v"
+    sketch_dim: 1024
+    update_interval: 64
+    seed: 42
+
+  l1_prefill_only:
+    method: "l1_leverage"
+    cache_size: 256
+    sink_size: 4
+    recent_size: 64
+    score_source: "v"
+    sketch_dim: 1024
+    update_interval: 0  # only compute at prefill
+    seed: 42

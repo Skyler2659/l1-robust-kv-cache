@@ -1,0 +1,87 @@
+# Quick experiment configuration for CPU/offline smoke tests.
+
+experiment_name: "quick_test"
+
+model:
+  name: "sshleifer/tiny-gpt2"
+  dtype: "float32"
+  device: "cpu"
+  trust_remote_code: false
+  attn_implementation: null
+  enable_pos_shift: false
+  output_attentions: true
+  local_files_only: false
+
+eviction:
+  method: "l1_leverage"
+  methods:
+    - "recency"
+    - "attention"
+    - "l1_leverage"
+    - "l2_leverage"
+    - "attention+l1"
+  cache_size: 16
+  sink_size: 2
+  recent_size: 4
+  score_source: "v"
+  sketch_dim: 64
+  update_interval: 8
+  update_policy: "every_n_steps"
+  seed: 0
+  hybrid_mode: "budget_split"
+  attn_budget_ratio: 0.3
+  geom_budget_ratio: 0.3
+  recent_budget_ratio: 0.3
+  sink_budget_ratio: 0.1
+  geometry_method: "l1"
+  debug_budget: true
+
+benchmark:
+  name: "niah"
+  depths: [0.2, 0.8]
+  max_words: 80
+  needles_per_depth: 1
+  context_length: 256
+  max_steps: 160
+  num_samples: 2
+  eval_target_only: true
+  use_synthetic_haystack: true
+  haystack_repeats: 30
+
+profiling:
+  enabled: true
+  track_memory: true
+  track_timing: true
+  warmup_steps: 2
+  repeats: 2
+  log_every: 50
+
+analysis:
+  overlap: true
+  rank_correlation: true
+  evidence_recall: true
+  counterfactual_deletion: false
+  restoration: false
+  leave_one_out: false
+  residual_explanation: false
+  case_study: true
+  case_study_count: 2
+  output_dir: "results/quick_test/analysis"
+
+methods:
+  - "recency"
+  - "attention"
+  - "l1_leverage"
+  - "l2_leverage"
+  - "attention+l1"
+
+cache_budgets: [16]
+context_lengths: [256]
+update_intervals: [8]
+
+output_dir: "results"
+save_selected_tokens: true
+save_scores: true
+progress_every: 50
+seed: 0
+overwrite: false

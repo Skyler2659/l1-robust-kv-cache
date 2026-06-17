@@ -1,0 +1,12 @@
+# Reasoning with distractors benchmark configuration
+name: "reasoning"
+
+# Number of samples
+n_samples: 50
+
+# Number of distractor sentences per sample
+n_distractors: 50
+
+# General
+max_steps: 4096
+eval_target_only: true

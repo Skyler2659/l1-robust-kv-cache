@@ -1,0 +1,84 @@
+experiment_name: "mlx_qwen25_05b_4bit"
+
+model:
+  name: "Qwen/Qwen2.5-0.5B-Instruct"
+  backend: "mlx"
+  dtype: "float16"
+  device: "mps"
+  quant_bits: 4
+  quant_group_size: 64
+  mlx_weight_quantize: true
+  mlx_cache_type: "kv"
+  prefill_step_size: 1024
+  trust_remote_code: false
+  output_attentions: false
+  local_files_only: false
+
+eviction:
+  method: "recency"
+  methods:
+    - "recency"
+    - "attention"
+    - "h2o"
+    - "snapkv"
+    - "pyramidkv"
+    - "l1_leverage"
+    - "l2_leverage"
+    - "attention+l1"
+  cache_size: 128
+  sink_size: 4
+  recent_size: 32
+  score_source: "v"
+  sketch_dim: 256
+  update_interval: 32
+  update_policy: "every_n_steps"
+  hybrid_mode: "budget_split"
+  lambda_attn: 0.5
+  attn_budget_ratio: 0.3
+  l1_budget_ratio: 0.3
+  recent_budget_ratio: 0.3
+  sink_budget_ratio: 0.1
+  window_size: 32
+  kernel_size: 5
+  pyramid_mode: "funnel"
+  seed: 42
+  debug_budget: true
+
+benchmark:
+  name: "niah"
+  depths: [0.5]
+  max_words: 120
+  needles_per_depth: 1
+  context_length: 512
+  max_steps: 512
+  max_new_tokens: 32
+  num_samples: 1
+  eval_target_only: true
+  use_synthetic_haystack: true
+  haystack_repeats: 30
+
+analysis:
+  overlap: true
+  rank_correlation: true
+  evidence_recall: true
+  case_study: true
+  case_study_count: 1
+
+methods:
+  - "recency"
+  - "attention"
+  - "h2o"
+  - "snapkv"
+  - "pyramidkv"
+  - "l1_leverage"
+  - "l2_leverage"
+  - "attention+l1"
+
+cache_budgets: [128]
+output_dir: "results"
+save_selected_tokens: true
+save_scores: false
+save_prompt_text: true
+progress_every: 20
+seed: 42
+overwrite: false

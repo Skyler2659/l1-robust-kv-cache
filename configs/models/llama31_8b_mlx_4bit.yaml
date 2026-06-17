@@ -1,0 +1,26 @@
+model:
+  name: "mlx-community/Meta-Llama-3.1-8B-Instruct-4bit"
+  family: "llama"
+  backend: "mlx"
+  quant_bits: 4
+  quant_group_size: 64
+  mlx_weight_quantize: false
+  dtype: "auto"
+  device: "mps"
+  trust_remote_code: false
+  local_files_only: false
+  max_context_length: 131072
+  uses_rope: true
+  rope_type: "llama3"
+  cache_format: "mlx_kv"
+  supports_attention_output: true
+  supports_hidden_states: false
+  supports_mlx_cache_edit: true
+  prompt_format:
+    mode: "plain"
+    system_prompt: null
+  generation:
+    max_new_tokens: 32
+    temperature: 0.0
+    top_p: 1.0
+    do_sample: false

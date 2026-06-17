@@ -1,0 +1,52 @@
+# Analysis configuration — which analyses to run and their parameters
+
+# Overlap analysis: Jaccard similarity between token selections
+overlap:
+  enabled: true
+  # Compare all method pairs
+
+# Rank correlation: Spearman/Kendall between scoring methods
+rank_correlation:
+  enabled: true
+  # Compare attention scores vs L1 scores vs L2 scores
+
+# Evidence recall: fraction of evidence tokens retained
+evidence_recall:
+  enabled: true
+  # Requires needle/multihop tasks with known evidence positions
+
+# Counterfactual deletion: PPL impact of removing top-k tokens
+counterfactual_deletion:
+  enabled: true
+  n_delete: [10, 25, 50, 100]  # number of tokens to delete
+  max_seq_len: 2048  # truncate for efficiency
+
+# Restoration: PPL recovery as tokens are added back
+restoration:
+  enabled: true
+  sink_size: 4
+  recent_size: 16
+  n_steps: 10
+  max_seq_len: 2048
+
+# Leave-one-out: ground-truth per-token importance
+leave_one_out:
+  enabled: false  # expensive — only run on small subsets
+  max_seq_len: 512  # LOO is O(n) forward passes
+  start: 0
+  end: 512
+
+# Residual explanation: decompose PPL gap
+residual_explanation:
+  enabled: false  # requires paired attention + L1 runs
+  sink_size: 4
+  recent_size: 64
+
+# Case study: export attention-fail/L1-succeed examples
+case_study:
+  enabled: true
+  count: 10  # number of examples per category
+  output_format: "json"
+
+# Output
+output_dir: "results/analysis"

@@ -1,0 +1,6 @@
+method: "l2_leverage"
+cache_size: 256
+sink_size: 4
+recent_size: 64
+score_source: "v"
+score_normalization: "rank"

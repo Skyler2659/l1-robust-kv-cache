@@ -1,0 +1,78 @@
+experiment_name: "niah_qwen25_7b_mlx4bit_core_overlap_5h"
+model:
+  name: "mlx-community/Qwen2.5-7B-Instruct-4bit"
+  family: "qwen"
+  backend: "mlx"
+  dtype: "auto"
+  device: "mps"
+  quant_bits: 4
+  quant_group_size: 64
+  mlx_weight_quantize: false
+  prefill_step_size: 1024
+  trust_remote_code: false
+  local_files_only: false
+  prompt_format:
+    mode: "plain"
+    system_prompt: null
+eviction:
+  method: "recency"
+  cache_size: 256
+  sink_size: 4
+  recent_size: 64
+  score_source: "v"
+  sketch_dim: 1024
+  update_interval: 32
+  update_policy: "every_n_steps"
+  score_normalization: "rank"
+  h2o_recent_size: 64
+  window_size: 64
+  attention_window: 64
+  observation_window: 64
+  pooling_kernel: 63
+  pooling_method: "max"
+  hybrid_mode: "budget_split"
+  lambda_attn: 0.5
+  attn_budget_ratio: 0.3
+  l1_budget_ratio: 0.3
+  recent_budget_ratio: 0.3
+  sink_budget_ratio: 0.1
+  seed: 42
+benchmark:
+  name: "niah"
+  depths: [0.1, 0.3, 0.5, 0.7, 0.9]
+  needles_per_depth: 2
+  num_samples: 10
+  context_length: 4096
+  max_words: 1600
+  max_steps: 4096
+  max_new_tokens: 32
+  eval_target_only: true
+  use_synthetic_haystack: true
+  haystack_repeats: 100
+methods:
+  - "full"
+  - "sink_recency"
+  - "accumulated_attention"
+  - "h2o_style"
+  - "snapkv_style"
+  - "l1_leverage"
+  - "l2_leverage"
+  - "attention_l1"
+  - "attention_l2"
+  - "sink_recent_attention_l1"
+  - "random"
+cache_budgets: [128, 256]
+analysis:
+  overlap: true
+  rank_correlation: true
+  evidence_recall: true
+  case_study: true
+  case_study_count: 10
+  include_oracle: false
+output_dir: "results"
+save_selected_tokens: true
+save_scores: true
+save_prompt_text: true
+progress_every: 100
+seed: 42
+overwrite: false
